@@ -1,0 +1,29 @@
+Source: soapypaveldeminsdr
+Section: libs
+Priority: optional
+Maintainer: Pavel Demin <pavel.demin@cern.ch>
+Uploaders: Josh Blum <josh@pothosware.com>
+Build-Depends:
+    debhelper (>= 9.0.0),
+    cmake,
+    libsoapysdr-dev
+Standards-Version: 4.1.4
+Homepage: https://github.com/pothosware/SoapyPavelDeminSDR/wiki
+Vcs-Git: https://github.com/pothosware/SoapyPavelDeminSDR.git
+Vcs-Browser: https://github.com/pothosware/SoapyPavelDeminSDR
+
+Package: soapysdr0.6-module-paveldeminsdr
+Architecture: any
+Multi-Arch: same
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Soapy PavelDeminSDR - PavelDeminSDR device support for Soapy SDR.
+ A Soapy module that supports PavelDeminSDR devices within the Soapy API.
+
+Package: soapysdr-module-paveldeminsdr
+Architecture: all
+Depends: soapysdr0.6-module-paveldeminsdr, ${misc:Depends}
+Description: Soapy PavelDeminSDR - PavelDeminSDR device support for Soapy SDR.
+ A Soapy module that supports PavelDeminSDR devices within the Soapy API.
+ .
+ This is an empty dependency package that pulls in the PavelDeminSDR module
+ for the default version of libsoapysdr.
