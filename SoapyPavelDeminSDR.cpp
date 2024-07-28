@@ -167,8 +167,6 @@ public:
 
         double frequency = 0.0, rate = 0.0;
         
-        std::cout << "In activateStream" << std::endl;
-
         if(direction == SOAPY_SDR_TX)
         {
             return SOAPY_SDR_NOT_SUPPORTED;
@@ -176,7 +174,6 @@ public:
         
         if(_socket != INVSOC)
         {
-            std::cout << "Alread initialized, nothing to do" << std::endl;
             return 0;
         }
         
@@ -184,13 +181,6 @@ public:
         rate = _rate;
         
         _socket = openConnection();
-        
-        std::cout << "Initialized" << std::endl;
-        
-        if(_socket == INVSOC)
-        {
-            std::cout << "socket is invalid" << std::endl;
-        }
         
         setFrequency(direction, 0, "RF", frequency);
         setSampleRate(direction, 0, rate);
@@ -246,23 +236,6 @@ public:
         //::ioctl(_socket, FIONREAD, &size);
         #endif
 
-#if 0        
-        if(size < total)
-        {
-            timeout.tv_sec = timeoutUs / 1000000;
-            timeout.tv_usec = timeoutUs % 1000000;
-
-            ::select(0, 0, 0, 0, &timeout);
-
-            #if defined(_WIN32)
-            ::ioctlsocket(_socket, FIONREAD, &size);
-            #else
-            ::ioctl(_socket, FIONREAD, &size);
-            #endif
-        }
-
-        if(size < total) return SOAPY_SDR_TIMEOUT;
-#endif
         #if defined(_WIN32)
         size = ::recv(_socket, (char *)_buf, total, MSG_WAITALL);
         #else
@@ -303,10 +276,6 @@ public:
     {
 	uint32_t buffer[10] = {0,0,0,0,0,0,0,0,0,0};
 
-        if (_socket == INVSOC)
-            std::cout << "in setFrequency: Socket not open" << std::endl;
-    
-        //if(name == "BB") return;
         if(name != "RF") throw runtime_error("setFrequency invalid name " + name);
 
         _freq_value = (uint32_t)floor(frequency + 0.5);
@@ -329,7 +298,6 @@ public:
     {
         double frequency = 0.0;
 
-        //if(name == "BB") return 0.0;
         if(name != "RF") throw runtime_error("getFrequency invalid name " + name);
 
         if(direction == SOAPY_SDR_RX)
@@ -351,7 +319,6 @@ public:
     {
         double rate = 0.0;
 
-        //if (name == "BB") return SoapySDR::RangeList(1, SoapySDR::Range(0.0, 0.0));
         if (name != "RF") throw runtime_error("getFrequencyRange invalid name " + name);
 
         if(direction == SOAPY_SDR_RX)
@@ -370,9 +337,6 @@ public:
     {
 	uint32_t buffer[10] = {0,0,0,0,0,0,0,0,0,0};
     
-        if (_socket == INVSOC)
-            std::cout << "in setSampleRate: Socket not open" << std::endl;
-
         if(48e3 == rate) _rate_value = 0;
         else if(96e3 == rate) _rate_value = 1;
         else if(192e3 == rate) _rate_value = 2;
@@ -429,25 +393,12 @@ private:
         int result;
         SOCKET socket;
         
-        std::cout << "In openConnection" << std::endl;
-
         socket = ::socket(AF_INET, SOCK_STREAM, 0);
         if(socket == INVSOC)
         {
             throw runtime_error("SoapyPavelDeminSDR could not create TCP socket");
         }
 
-#if 0
-        /* enable non-blocking mode */
-
-        #if defined(_WIN32)
-        u_long mode = 1;
-        ::ioctlsocket(socket, FIONBIO, &mode);
-        #else
-        int flags = ::fcntl(socket, F_GETFL, 0);
-        ::fcntl(socket, F_SETFL, flags | O_NONBLOCK);
-        #endif
-#endif
         memset(&addr, 0, sizeof(addr));
         addr.sin_family = AF_INET;
         inet_pton(AF_INET, _addr.c_str(), &addr.sin_addr);
@@ -459,35 +410,6 @@ private:
             message << "SoapyPavelDeminSDR could not connect to " << _addr << ":" << _port;
             throw runtime_error(message.str());
         }
-#if 0
-        timeout.tv_sec = 5;
-        timeout.tv_usec = 0;
-
-        FD_ZERO(&writefds);
-        FD_SET(socket, &writefds);
-
-        #if defined(_WIN32)
-        result = ::select(0, 0, &writefds, 0, &timeout);
-        #else
-        result = ::select(socket + 1, 0, &writefds, 0, &timeout);
-        #endif
-
-        if(result <= 0)
-        {
-            message << "SoapyPavelDeminSDR could not connect to " << _addr << ":" << _port;
-            throw runtime_error(message.str());
-        }
-
-        /* disable non-blocking mode */
-
-        #if defined(_WIN32)
-        mode = 0;
-        ::ioctlsocket(socket, FIONBIO, &mode);
-        #else
-        flags = ::fcntl(socket, F_GETFL, 0);
-        ::fcntl(socket, F_SETFL, flags & ~O_NONBLOCK);
-        #endif
-#endif        
         return socket;
     }
 
@@ -496,7 +418,6 @@ private:
         stringstream message;
 
         if(socket == INVSOC){
-            std::cout << "in sendCommand: socket not open" << std::endl;
             return;
         } 
 
